@@ -49,8 +49,7 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	log := logger.FromContext(ctx)
 
 	dummyInstance := &interviewcomv1alpha1.Dummy{}
-	err := r.Get(ctx, req.NamespacedName, dummyInstance)
-	if err != nil {
+	if err := r.Get(ctx, req.NamespacedName, dummyInstance); err != nil {
 		if apierrors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("Dummy resource %s deleted", req.NamespacedName))
 		}
@@ -63,8 +62,7 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	// Step 3, echo in status
 	dummyPatchBase := client.MergeFrom(dummyInstance.DeepCopy())
 	dummyInstance.Status.SpecEcho = dummyInstance.Spec.Message
-	err = r.Status().Patch(ctx, dummyInstance, dummyPatchBase)
-	if err != nil {
+	if err := r.Status().Patch(ctx, dummyInstance, dummyPatchBase); err != nil {
 		log.Error(err, "unable to patch Dummy object's status")
 		return ctrl.Result{}, err
 	}
@@ -91,8 +89,7 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	// Pod status in dummy status
 	dummyPatchBase = client.MergeFrom(dummyInstance.DeepCopy())
 	dummyInstance.Status.PodStatus = string(pod.Status.Phase)
-	err = r.Status().Patch(ctx, dummyInstance, dummyPatchBase)
-	if err != nil {
+	if err := r.Status().Patch(ctx, dummyInstance, dummyPatchBase); err != nil {
 		log.Error(err, "unable to patch Dummy object's status")
 		return ctrl.Result{}, err
 	}
