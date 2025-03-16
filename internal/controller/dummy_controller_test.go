@@ -1,5 +1,5 @@
 /*
-Copyright 2025.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,67 +18,78 @@ package controller
 
 import (
 	"context"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
 
 	interviewcomv1alpha1 "github.com/LilShah/dummy-controller/api/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	//+kubebuilder:scaffold:imports
 )
 
-var _ = Describe("Dummy Controller", func() {
-	Context("When reconciling a resource", func() {
-		const resourceName = "test-resource"
+func getDummy(name string, namespace string, message string) *interviewcomv1alpha1.Dummy {
+	return &interviewcomv1alpha1.Dummy{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: interviewcomv1alpha1.DummySpec{
+			Message: message,
+		},
+	}
+}
 
-		ctx := context.Background()
+const (
+	testDummyName      = "sample"
+	testDummyNamespace = "default"
+)
 
-		typeNamespacedName := types.NamespacedName{
-			Name:      resourceName,
-			Namespace: "default", // TODO(user):Modify as needed
+func TestDummyController(t *testing.T) {
+
+	var tests = []struct {
+		input    string
+		expected string
+	}{
+		{"Hello from the other side", "Hello from the other side"},
+		{"", ""},
+		{"👀😂😉⚠️", "👀😂😉⚠️"},
+		{"Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long", "Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long Long"},
+		{"!@#$%^&*()_+|\"``~", "!@#$%^&*()_+|\"``~"},
+	}
+
+	for _, test := range tests {
+		dummy := getDummy(testDummyName, testDummyNamespace, test.input)
+		scheme := runtime.NewScheme()
+		utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+		utilruntime.Must(interviewcomv1alpha1.AddToScheme(scheme))
+
+		fakeClient := fake.NewClientBuilder().WithScheme(scheme).WithRuntimeObjects(dummy).WithStatusSubresource(dummy).Build()
+		r := &DummyReconciler{
+			Client: fakeClient,
+			Scheme: scheme,
 		}
-		dummy := &interviewcomv1alpha1.Dummy{}
 
-		BeforeEach(func() {
-			By("creating the custom resource for the Kind Dummy")
-			err := k8sClient.Get(ctx, typeNamespacedName, dummy)
-			if err != nil && errors.IsNotFound(err) {
-				resource := &interviewcomv1alpha1.Dummy{
-					ObjectMeta: metav1.ObjectMeta{
-						Name:      resourceName,
-						Namespace: "default",
-					},
-					// TODO(user): Specify other spec details if needed.
-				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-			}
-		})
+		_, err := r.Reconcile(
+			context.TODO(),
+			reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Name:      testDummyName,
+					Namespace: testDummyNamespace,
+				},
+			},
+		)
+		require.NoError(t, err)
 
-		AfterEach(func() {
-			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &interviewcomv1alpha1.Dummy{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
+		err = r.Get(context.TODO(), types.NamespacedName{Name: testDummyName, Namespace: testDummyNamespace}, dummy)
+		assert.NoError(t, err)
 
-			By("Cleanup the specific resource instance Dummy")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
-		})
-		It("should successfully reconcile the resource", func() {
-			By("Reconciling the created resource")
-			controllerReconciler := &DummyReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
-			}
-
-			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
-			Expect(err).NotTo(HaveOccurred())
-			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
-			// Example: If you expect a certain status condition after reconciliation, verify it here.
-		})
-	})
-})
+		assert.Equal(t, test.expected, dummy.Spec.Message)
+		assert.Equal(t, test.expected, dummy.Status.SpecEcho)
+	}
+}
