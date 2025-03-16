@@ -5,20 +5,21 @@
 Dummy Controller is a simple example Kubernetes controller that creates an nginx pod for every Dummy custom resource created.
 
 ```yaml
-apiVersion: interview.interview.com/v1alpha1
+apiVersion: interview.com/v1alpha1
 kind: Dummy
 metadata:
-  name: dummy1
-  namespace: example
+  labels:
+    app.kubernetes.io/name: dummy
+  name: dummy
 spec:
-  message: "I'm just a dummy"
+  message: "this is a dummy called dummy"
 ```
 
 The message in the spec is used to populate a string in the status. Additionally, the status also contains a copy of the pod's current phase
 
 ```yaml
 status:
-  specEcho: "I'm just a dummy"
+  specEcho: "this is a dummy called dummy"
   podStatus: "Running"
 ```
 

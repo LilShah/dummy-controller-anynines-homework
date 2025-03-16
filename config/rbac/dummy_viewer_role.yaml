@@ -8,7 +8,7 @@ metadata:
   name: dummy-viewer-role
 rules:
 - apiGroups:
-  - interview.com.interview.com
+  - interview.com
   resources:
   - dummies
   verbs:
@@ -16,7 +16,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - interview.com.interview.com
+  - interview.com
   resources:
   - dummies/status
   verbs:

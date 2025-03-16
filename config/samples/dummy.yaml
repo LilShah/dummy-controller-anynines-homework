@@ -1,9 +1,8 @@
-apiVersion: interview.com.interview.com/v1alpha1
+apiVersion: interview.com/v1alpha1
 kind: Dummy
 metadata:
   labels:
-    app.kubernetes.io/name: dummy-controller
-    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: dummy
   name: dummy
 spec:
   message: "this is a dummy called dummy"

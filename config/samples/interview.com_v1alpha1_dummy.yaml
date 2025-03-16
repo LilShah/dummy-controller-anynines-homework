@@ -1,4 +1,4 @@
-apiVersion: interview.com.interview.com/v1alpha1
+apiVersion: interview.com/v1alpha1
 kind: Dummy
 metadata:
   labels:

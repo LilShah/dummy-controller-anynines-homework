@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.1
-  name: dummies.interview.com.interview.com
+  name: dummies.interview.com
 spec:
-  group: interview.com.interview.com
+  group: interview.com
   names:
     kind: Dummy
     listKind: DummyList

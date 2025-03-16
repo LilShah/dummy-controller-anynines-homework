@@ -37,9 +37,9 @@ type DummyReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=interview.com.interview.com,resources=dummies,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=interview.com.interview.com,resources=dummies/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=interview.com.interview.com,resources=dummies/finalizers,verbs=update
+// +kubebuilder:rbac:groups=interview.com,resources=dummies,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=interview.com,resources=dummies/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=interview.com,resources=dummies/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=create;update;patch;get;list;watch
 // +kubebuilder:rbac:groups=core,resources=pods/status,verbs=get;list;watch
 

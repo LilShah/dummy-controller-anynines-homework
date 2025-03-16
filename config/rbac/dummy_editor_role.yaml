@@ -8,7 +8,7 @@ metadata:
   name: dummy-editor-role
 rules:
 - apiGroups:
-  - interview.com.interview.com
+  - interview.com
   resources:
   - dummies
   verbs:
@@ -20,7 +20,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - interview.com.interview.com
+  - interview.com
   resources:
   - dummies/status
   verbs:
