@@ -52,14 +52,15 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if err := r.Get(ctx, req.NamespacedName, dummyInstance); err != nil {
 		if apierrors.IsNotFound(err) {
 			log.Info(fmt.Sprintf("Dummy resource %s deleted", req.NamespacedName))
+			return ctrl.Result{}, nil
 		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 
 	// Step 2, logging details
 	log.Info(fmt.Sprintf("Dummy resource %s in namespace %s, with the message: %s", dummyInstance.Name, dummyInstance.Namespace, dummyInstance.Spec.Message))
 
-	// Step 3, echo in status
+	// Step 3, echo message in status
 	dummyPatchBase := client.MergeFrom(dummyInstance.DeepCopy())
 	dummyInstance.Status.SpecEcho = dummyInstance.Spec.Message
 	if err := r.Status().Patch(ctx, dummyInstance, dummyPatchBase); err != nil {
@@ -74,14 +75,12 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			// Create only if pod doesn't exist
 			pod = getPodManifest(dummyInstance, r.Scheme)
 			if err := r.Create(ctx, pod); err != nil {
-				if !apierrors.IsAlreadyExists(err) {
-					log.Error(err, "unable to create pod for dummy")
-					return ctrl.Result{}, err
-				}
+				log.Error(err, "unable to create pod for dummy")
+				return ctrl.Result{}, err
 			}
 			log.Info(fmt.Sprintf("Pod %s created for dummy instance %s", dummyInstance.Name, pod.Name))
 			// reconcile after creating, get updated pod manifest
-			return ctrl.Result{Requeue: true}, nil
+			return ctrl.Result{}, nil
 		}
 		log.Error(err, "unable to get pod for dummy")
 		return ctrl.Result{}, err
@@ -94,7 +93,6 @@ func (r *DummyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Current dummy status: " + dummyInstance.Status.PodStatus)
 	log.Info(fmt.Sprintf("Reconciled %s", dummyInstance.Name))
 	return ctrl.Result{}, nil
 }
