@@ -22,38 +22,13 @@ status:
   podStatus: "Running"
 ```
 
-## Installing Kind
+## Requirements
 
-To run the image, you will need a Kubernetes cluster (for example, one created with [Minikube](https://minikube.sigs.k8s.io/docs/start/) or [Kind](https://kind.sigs.k8s.io/)).
-You can use [Homebrew](https://brew.sh/) (mac, linux) or [Chocolatey](https://chocolatey.org/) (windows) to install Kind. Homebrew is installed via this command:
+The image for this operator is pushed on Docker Hub at [lilshah/dummy-controller](https://hub.docker.com/repository/docker/lilshah/dummy-controller/general). To run it, a kubernetes cluster is required. Mini kubernetes clusters can be used as well like [Minikube](https://minikube.sigs.k8s.io/docs/start/) or [Kind](https://kind.sigs.k8s.io/). Additionally, [kubectl](https://kubernetes.io/docs/tasks/tools/) is required to interface with the cluster.
 
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
+## Running from repo
 
-To install Chocolatey on windows, you must ensure `Get-ExecutionPolicy` is not `Restricted`. Use `Bypass` to bypass the policy to get things installed or `AllSigned` for quite a bit more security.
-
-In an elevated Powershell environment, run `Get-ExecutionPolicy`. If it returns `Restricted`, then run `Set-ExecutionPolicy AllSigned` or `Set-ExecutionPolicy Bypass -Scope Process`.
-
-Now run the following command:
-
-```sh
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```
-
-Chocolatey should be ready to use now.
-
-To install Kind, run the relevant command:
-
-MacOS/Linux: `brew install kind`
-
-Windows: `choco install kind`
-
-You can now create and run a local cluster with `kind create cluster`
-
-## Test the controller
-
-The simplest method to install the controller for testing is to clone the [dumy-controller repo](https://github.com/LilShah/dummy-controller-anynines-homework) and from within it, run the following command:
+Since just running the given image isn't enough to run the entire operator, the best way to run it is via this repo. Running the following command will deploy the controller, RBAC, CRD and all other manifests into the cluster:
 
 ```sh
 make deploy
@@ -65,10 +40,8 @@ Give it a few minutes to download and create the pod. You can check pod status b
 kubectl get pods
 ```
 
-Sample Dummy CRs are also provided within the repo at `config/samples`:
+Sample Dummy CRs are also provided within the repo at `config/samples`. They can be used to test the controller:
 
 ```sh
 kubectl apply -f config/samples/dummy.yaml
 ```
-
-You will need to install [kubectl](https://kubernetes.io/docs/tasks/tools/) to run the above commands.
